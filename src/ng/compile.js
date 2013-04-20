@@ -653,7 +653,9 @@ function $CompileProvider($provide) {
         }
 
         if (directive.template) {
-          assertNoDuplicate('template', templateDirective, directive, $compileNode);
+          if (directive.replace) {
+            assertNoDuplicate('template', templateDirective, directive, $compileNode);
+          }
           templateDirective = directive;
 
           directiveValue = (isFunction(directive.template))
@@ -692,12 +694,14 @@ function $CompileProvider($provide) {
 
             ii = directives.length;
           } else {
-            $compileNode.html(directiveValue);
+            $compileNode.append(directiveValue);
           }
         }
 
         if (directive.templateUrl) {
-          assertNoDuplicate('template', templateDirective, directive, $compileNode);
+          if (directive.replace) {
+            assertNoDuplicate('template', templateDirective, directive, $compileNode);
+          }
           templateDirective = directive;
           nodeLinkFn = compileTemplateUrl(directives.splice(i, directives.length - i),
               nodeLinkFn, $compileNode, templateAttrs, $rootElement, directive.replace,
@@ -987,8 +991,6 @@ function $CompileProvider($provide) {
               ? origAsyncDirective.templateUrl($compileNode, tAttrs)
               : origAsyncDirective.templateUrl;
 
-      $compileNode.html('');
-
       $http.get(templateUrl, {cache: $templateCache}).
         success(function(content) {
           var compileNode, tempTemplateAttrs, $template;
@@ -1009,7 +1011,7 @@ function $CompileProvider($provide) {
             mergeTemplateAttributes(tAttrs, tempTemplateAttrs);
           } else {
             compileNode = beforeTemplateCompileNode;
-            $compileNode.html(content);
+            $compileNode.append(content);
           }
 
           directives.unshift(derivedSyncDirective);
